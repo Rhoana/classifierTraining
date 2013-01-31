@@ -1,11 +1,10 @@
 %author: Verena Kaynig
 %this you can change
 testImageNumber = [1 2];
-maxNumberOfSamplesPerClass = 500;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%save feature matrizes
+%precompute and save feature matrizes
   cs = 29;
   ms = 3;
   csHist = cs;
@@ -33,104 +32,31 @@ maxNumberOfSamplesPerClass = 500;
       imwrite(im,strcat(name(1:6),'_train.tif'),'tif');
     end
   end
-  
-imgNames = dir('*_train.tif');
-fmPos = [];
-fmNeg = [];
 
-disp('for loop');
-tic;
-for i=1:length(imgNames)
-  name = imgNames(i).name;
+% Preload training data  
+trainimgNames = dir('*_train.tif');
+for i=1:length(trainimgNames)
+  figure(i);
+  clf;
+  name = trainimgNames(i).name;
   im = imread(name);
-  posPos = find(im(:,:,2)==255 & im(:,:,1)==0);
-  posNeg = find(im(:,:,1)==255 & im(:,:,2)==0);
-  
-  if length(posPos)>0 | length(posNeg)>0
-    load(strcat(name(1:end-10),'_fm.mat'));
-    fm = reshape(fm,size(fm,1)*size(fm,2),size(fm,3));
-    fm(isnan(fm))=0;
-    fmPos = [fmPos; fm(posPos,:)];
-    fmNeg = [fmNeg; fm(posNeg,:)];
-    clear fm;
-  end
+  fg_image = (im(:,:,2)==255 & im(:,:,1)==0);
+  bg_image = (im(:,:,1)==255 & im(:,:,2)==0);
+  set(gcf, 'UserData', struct('Training_FG', fg_image, ...
+                              'Training_BG', bg_image));
 end
-toc;
-clear posPos
-clear posNeg
-
-disp('training')
-disp('Original number of samples per class: ');
-disp('membrane: ');
-disp(size(fmPos,1));
-disp('not membrane: ');
-disp(size(fmNeg,1));
-
-tic;
-
-y = [zeros(size(fmNeg,1),1);ones(size(fmPos,1),1)];
-x = double([fmNeg;fmPos]);
-
-extra_options.sampsize = [maxNumberOfSamplesPerClass, maxNumberOfSamplesPerClass];
-forest = classRF_train(x, y, 300,5,extra_options);
-%forest = classRF_train(x, y, 500,5);  
-toc;
-
-disp('classification')
-%now give classification results
-imgNames = dir('*_image.tif');
-
-for i=testImageNumber
-disp('preparation')
-tic;
-  name = imgNames(i).name
-  im = imread(name);
-  load(strcat(name(1:end-10),'_fm.mat'));
-  fm = reshape(fm,size(fm,1)*size(fm,2),size(fm,3));
-  fm(isnan(fm))=0;
-  clear fmNeg
-  clear fmPos
-  im=uint8Img(im(:,:,1));
-  imsize = size(im);
-  clear y
-  clear im
   
-  votes = zeros(imsize(1)*imsize(2),1);
-  test = struct();
-  toc;
-  disp('prediction')
-  tic;
 
-% $$$   for j=1:4				% 
-% $$$     [y_h,v] = classRF_predict(double(fm(j:4:end,:)), forest);
-% $$$     votes(j:4:end,:)=v(:,2);    
-% $$$ end
-    
-  [y_h,v] = classRF_predict(double(fm), forest);
-  votes = v(:,2);
-  votes = reshape(votes,imsize);
-  votes = double(votes)/max(votes(:));
-toc;
-  disp('visualization')
-  tic;
-  im = imread(name);			% 
-  %this illustration uses the thickened skeleton of the
-  %segmentation
-  %figure;
-  %this is the skeletonized view
-  figure; imshow(makeColorOverlay(votes,im));
-  imwrite(makeColorOverlay(votes,im),strcat(name(1:6),'_overlay.tif'),'tif');
-  %this is the thick membrane view
-%  figure; imshow(makeColorOverlay(uint8Img(filterSmallRegions(votes>=0.5,1000)),uint8Img(im)));
-  pause(1); %to give matlab time to show the figure
-%  clear votes
-%  clear y_hat
-toc;
-end
+% Store 
+maindata = get(1, 'UserData');
+maindata.testImageNumber = testImageNumber;
+maindata.imgNames = imgNames;
+set(1, 'UserData', maindata);
 
+train;
+update_figures;
 
 %When the result is fine, save the random forest classifier
 %with this command:
 
 %save forest.mat forest
-

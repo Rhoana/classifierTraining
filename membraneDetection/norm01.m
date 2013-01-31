@@ -9,3 +9,4 @@ function imNorm = norm01(im)
   else
     imNorm = im;
   end
+  imNorm = histeq(imNorm);

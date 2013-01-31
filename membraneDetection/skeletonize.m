@@ -2,3 +2,4 @@
 function skelImage = skeletonize(image)
   
   skelImage = watershed(bwdist(max(image(:))-image))==0;
+  skelImage = bwmorph(image,'skel',Inf);
