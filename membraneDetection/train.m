@@ -38,6 +38,12 @@ disp(size(fmPos,1));
 disp('not membrane: ');
 disp(size(fmNeg,1));
 
+if (size(fmPos,1) == 0) && (size(fmNeg,1) == 0),
+   mainData.Forest = 0;
+   set(1, 'UserData', mainData);
+   return
+end
+
 tic;
 
 y = [zeros(size(fmNeg,1),1);ones(size(fmPos,1),1)];

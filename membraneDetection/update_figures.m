@@ -30,10 +30,12 @@ for i=testImageNumber
 % $$$     votes(j:4:end,:)=v(:,2);    
 % $$$ end
     
-  [y_h,v] = classRF_predict(double(fm), forest);
-  votes = v(:,2);
+  if isa(forest, 'struct'),
+    [y_h,v] = classRF_predict(double(fm), forest);
+    votes = v(:,2);
+    votes = double(votes)/max(votes(:));
+  end
   votes = reshape(votes,imsize);
-  votes = double(votes)/max(votes(:));
 toc;
   disp('visualization')
   tic;
