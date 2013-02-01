@@ -2,14 +2,13 @@ function train()
 maxNumberOfSamplesPerClass = 500;
 
 mainData = get(1, 'UserData');
-testImageNumber = mainData.testImageNumber;
 imgNames = mainData.imgNames;
 
 fmPos = [];
 fmNeg = [];
 
 tic;
-for i=testImageNumber;
+for i=1:length(imgNames),
   figure(i);
   clf;
   thisData = get(gcf, 'UserData');

@@ -1,10 +1,9 @@
 function update_figures()
 mainData = get(1, 'UserData');
-testImageNumber = mainData.testImageNumber;
 imgNames = mainData.imgNames;
 forest = mainData.Forest;
 
-for i=testImageNumber
+for i=1:length(imgNames),
   disp('preparation')
   tic;
   name = imgNames(i).name

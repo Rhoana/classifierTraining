@@ -1,6 +1,5 @@
 function save_results(hObject, eventdata)
    mainData = get(1, 'UserData');
-   testImageNumber = mainData.testImageNumber;
    imgNames = mainData.imgNames;
    forest = mainData.Forest;
 

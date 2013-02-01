@@ -1,7 +1,4 @@
 %author: Verena Kaynig
-%this you can change
-testImageNumber = [1 2];
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 %precompute and save feature matrizes
@@ -49,7 +46,6 @@ end
 
 % Store 
 maindata = get(1, 'UserData');
-maindata.testImageNumber = testImageNumber;
 maindata.imgNames = imgNames;
 set(1, 'UserData', maindata);
 
