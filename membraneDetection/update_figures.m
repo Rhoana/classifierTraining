@@ -7,7 +7,7 @@ for i=1:length(imgNames),
   disp('preparation')
   tic;
   name = imgNames(i).name
-  im = imread(name);
+  im = norm01(imread(name));
   load(strcat(name(1:end-10),'_fm.mat'));
   fm = reshape(fm,size(fm,1)*size(fm,2),size(fm,3));
   fm(isnan(fm))=0;
@@ -38,7 +38,8 @@ for i=1:length(imgNames),
 toc;
   disp('visualization')
   tic;
-  im = imread(name);			% 
+  im = norm01(imread(name));			% 
+  size(im)
   %this illustration uses the thickened skeleton of the
   %segmentation
   %figure;
