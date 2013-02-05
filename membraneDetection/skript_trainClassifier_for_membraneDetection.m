@@ -40,7 +40,7 @@ for i=1:length(trainimgNames)
   fg_image = (im(:,:,2)==255 & im(:,:,1)==0);
   bg_image = (im(:,:,1)==255 & im(:,:,2)==0);
   set(gcf, 'UserData', struct('Training_FG', fg_image, ...
-                              'Training_BG', bg_image,
+                              'Training_BG', bg_image, ...
                               'ShowOverlay', 1));
 end
   
