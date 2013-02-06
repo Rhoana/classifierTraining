@@ -15,8 +15,8 @@ for i=1:length(imgNames)
     if ~exist(strcat(name(1:6),'_fm.mat'));
         disp('extracting membrane features');
         disp(name);
-        im = norm01((imresize(imread(imgNames(i).name),1)));
-        fm  = membraneFeatures(im, cs, ms, csHist);
+        im = imresize(imread(imgNames(i).name),1);
+        fm  = membraneFeatures(im, cs, ms, csHist);  % calls norm01
         save(strcat(name(1:6),'_fm.mat'),'fm');
         clear fm
         clear im
