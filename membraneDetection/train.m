@@ -1,4 +1,4 @@
-function train()
+function train( UseGPU )
 maxNumberOfSamplesPerClass = 500;
 
 mainData = get(1, 'UserData');
@@ -9,22 +9,22 @@ fmNeg = [];
 
 tic;
 for i=1:length(imgNames),
-  figure(i);
-  clf;
-  thisData = get(gcf, 'UserData');
-  fg_image = thisData.Training_FG;
-  bg_image = thisData.Training_BG;
-  posPos = find(fg_image);
-  posNeg = find(bg_image);
-  if length(posPos)>0 | length(posNeg)>0
-    name = imgNames(i).name
-    load(strcat(name(1:end-10),'_fm.mat'));
-    fm = reshape(fm,size(fm,1)*size(fm,2),size(fm,3));
-    fm(isnan(fm))=0;
-    fmPos = [fmPos; fm(posPos,:)];
-    fmNeg = [fmNeg; fm(posNeg,:)];
-    clear fm;
-  end
+    figure(i);
+    clf;
+    thisData = get(gcf, 'UserData');
+    fg_image = thisData.Training_FG;
+    bg_image = thisData.Training_BG;
+    posPos = find(fg_image);
+    posNeg = find(bg_image);
+    if length(posPos)>0 | length(posNeg)>0
+        name = imgNames(i).name
+        load(strcat(name(1:end-10),'_fm.mat'));
+        fm = reshape(fm,size(fm,1)*size(fm,2),size(fm,3));
+        fm(isnan(fm))=0;
+        fmPos = [fmPos; fm(posPos,:)];
+        fmNeg = [fmNeg; fm(posNeg,:)];
+        clear fm;
+    end
 end
 toc;
 clear posPos
@@ -38,9 +38,9 @@ disp('not membrane: ');
 disp(size(fmNeg,1));
 
 if (size(fmPos,1) == 0) && (size(fmNeg,1) == 0),
-   mainData.Forest = 0;
-   set(1, 'UserData', mainData);
-   return
+    mainData.Forest = 0;
+    set(1, 'UserData', mainData);
+    return
 end
 
 tic;
@@ -49,9 +49,18 @@ y = [zeros(size(fmNeg,1),1);ones(size(fmPos,1),1)];
 x = double([fmNeg;fmPos]);
 
 extra_options.sampsize = [maxNumberOfSamplesPerClass, maxNumberOfSamplesPerClass];
-forest = classRF_train(x, y, 300,5,extra_options);
-%forest = classRF_train(x, y, 500,5);  
+if mainData.useGPU
+    %forest = gpuTrain(x, y, 300, 5, extra_options);
+    %forest = gpuTrain(x, y, 500, 5, extra_options);
+    forest = gpuTrain(x, y, 1024, 5, extra_options);
+else
+    forest = classRF_train(x, y, 300, 5, extra_options);
+    %forest = classRF_train(x, y, 500, 5);
+    %forest = classRF_train(x, y, 1024, 5);
+end
 toc;
 
 mainData.Forest = forest;
 set(1, 'UserData', mainData);
+
+end
