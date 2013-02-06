@@ -12,49 +12,59 @@ for i=1:length(imgNames),
     tic;
     name = imgNames(i).name
     im = norm01(imread(name));
-    load(strcat(name(1:end-10),'_fm.mat'));
-    fm = reshape(fm,size(fm,1)*size(fm,2),size(fm,3));
-    fm(isnan(fm))=0;
-    clear fmNeg
-    clear fmPos
-    im=uint8Img(im(:,:,1));
-    imsize = size(im);
-    clear y
-    clear im
     
-    votes = zeros(imsize(1)*imsize(2),1);
-    test = struct();
-    toc;
-    disp('prediction')
-    tic;
-    
-    % $$$   for j=1:4				%
-    % $$$     [y_h,v] = classRF_predict(double(fm(j:4:end,:)), forest);
-    % $$$     votes(j:4:end,:)=v(:,2);
-    % $$$ end
-    
-    if isa(forest, 'struct')
-        if mainData.useGPU
-            v = double(predictor.predict(fm));
-        else
-            [y_h,v] = classRF_predict(double(fm), forest);
-        end
-        votes = v(:,2);
-        votes = double(votes)/max(votes(:));
+    curuserdata = get(i, 'UserData');
+    if curuserdata.ShowOverlay,
+       if isempty(curuserdata.votes),
+         load(strcat(name(1:end-10),'_fm.mat'));
+         fm = reshape(fm,size(fm,1)*size(fm,2),size(fm,3));
+         fm(isnan(fm))=0;
+         clear fmNeg
+         clear fmPos
+         im=uint8Img(im(:,:,1));
+         imsize = size(im);
+         clear y
+         clear im
+         
+         votes = zeros(imsize(1)*imsize(2),1);
+         test = struct();
+         toc;
+         disp('prediction')
+         tic;
+         
+         % $$$   for j=1:4				%
+         % $$$     [y_h,v] = classRF_predict(double(fm(j:4:end,:)), forest);
+         % $$$     votes(j:4:end,:)=v(:,2);
+         % $$$ end
+         
+         if isa(forest, 'struct')
+           if mainData.useGPU
+             v = double(predictor.predict(fm));
+           else
+             [y_h,v] = classRF_predict(double(fm), forest);
+           end
+           votes = v(:,2);
+           votes = double(votes)/max(votes(:));
+         end
+         
+         votes = reshape(votes,imsize);
+         curuserdata.votes = votes;
+         set(i, 'UserData', curuserdata);
+       end
+       votes = curuserdata.votes;
     end
-    
-    votes = reshape(votes,imsize);
     toc;
     disp('visualization')
     tic;
-    im = norm01(imread(name));
+    im = double(imread(name));
+    im = im - min(im(:));
+    im = im / max(im(:));
     %size(im)
     %this illustration uses the thickened skeleton of the
     %segmentation
     %figure;
     %this is the skeletonized view
     figure(i);
-    curuserdata = get(i, 'UserData');
     if curuserdata.ShowOverlay,
         imshow(makeColorOverlay(votes,im));
     else

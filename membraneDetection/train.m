@@ -25,6 +25,9 @@ for i=1:length(imgNames),
         fmNeg = [fmNeg; fm(posNeg,:)];
         clear fm;
     end
+    % clear votes to force recompute in update_figures
+    thisData.votes = [];
+    set(gcf, 'UserData', thisData);
 end
 toc;
 clear posPos

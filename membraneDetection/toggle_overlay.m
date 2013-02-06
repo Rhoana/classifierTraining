@@ -5,5 +5,6 @@ parentfig = get(get(hObject, 'Parent'), 'Parent');
 userdata = get(parentfig, 'UserData');
 userdata.ShowOverlay = ~ userdata.ShowOverlay
 set(parentfig, 'UserData', userdata);
+update_figures;
 
 end
